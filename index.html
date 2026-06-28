@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="blue.png">
+    <title>CRUSH</title>
+    <link rel="stylesheet" href="Crush.css">
+</head>
+<body>
+    
+    <div class="container">
+        <div class="media-box">
+ <img src="gp10.gif" alt="photo" class="media">
+        </div>
+        <h1>WILL YOU MARRY ME?</h1>
+
+        <div class="buttons">
+            <div class="yes-container">
+                <button onclick="alert('JOKE LANG HAHAHA, MAKE SURE TO TURN UR VOLUME UP'); yes()">Yes</button>
+                
+            </div>
+
+            <div class="no-container">
+                <button class="no" id="noBtn">No</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+       function yes() {
+    document.body.classList.add("fade-out");
+
+    setTimeout(() => {
+        window.location.href = "index0.html";
+    }, 900); 
+}
+    </script>
+
+    <script src="crush.js"></script>
+    <script src="persistent-audio.js"></script>
+</body>
+</html>
+

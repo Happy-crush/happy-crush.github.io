@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="blue.png">
+    <title>CRUSH</title>
+    <link rel="stylesheet" href="music.css">
+    <link rel="stylesheet" href="player-bar.css">
+</head>
+<body>
+     <canvas id="flowerCanvas"></canvas>
+
+    <div class="page-wrapper">
+        <div class="top-buttons">
+            <a id="button1" href="index0.html" class="top-button-link">FLOWERS</a>
+            <a id="button2" href="index2.html" class="top-button-link">LETTER</a>
+            <a id="button3" href="index1.html" class="top-button-link">REMINDERS</a>
+            <a id="button4" href="index3.html" class="top-button-link">MUSIC</a>
+        </div>
+    </div>
+
+    <div class="player-container">
+        <div class="music-player">
+        <div class="player-header">
+            <h1>Music</h1>
+        </div>
+
+        <div class="now-playing">
+            <img id="albumArt" src="images/f1.png" alt="Album Art" class="album-art">
+            <div class="track-info">
+                <h2 id="trackTitle">Select a track</h2>
+                <p id="artistName">Unknown Artist</p>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <span class="time" id="currentTime">0:00</span>
+            <progress id="progressBar" value="0" max="100"></progress>
+            <span class="time" id="duration">0:00</span>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn" class="control-btn">⏮</button>
+            <button id="playBtn" class="control-btn play-btn">▶</button>
+            <button id="nextBtn" class="control-btn">⏭</button>
+        </div>
+
+        <div class="volume-container">
+            <span class="volume-icon">🔊</span>
+            <input type="range" id="volumeSlider" min="0" max="100" value="100" class="volume-slider">
+            <span id="volumeValue">100%</span>
+        </div>
+    </div>
+
+    <div class="playlist-container">
+        <div class="playlist">
+            <h3>Playlist</h3>
+            <ul id="playlistItems">
+                 <li class="track-item" data-src="Alex Warren - On My Mind (Lyrics) ft. ROSÉ.mp3">
+                    <span class="track-number">1</span>
+                    <span class="track-name">On My Mind</span>
+                    <span class="track-artist">Alex Warren&ROSE</span>
+                </li>
+                <li class="track-item active" data-src="Fallen.mp3">
+                    <span class="track-number">2</span>
+                    <span class="track-name">Fallen</span>
+                    <span class="track-artist">Lola Amour</span>
+                </li>
+                <li class="track-item" data-src="Daniel Caesar - Who Knows (Official Lyric Video).mp3">
+                    <span class="track-number">3</span>
+                    <span class="track-name">Who Knows</span>
+                    <span class="track-artist">Daniel Caesar</span>
+                </li>
+                <li class="track-item" data-src="Kalapastangan - fitterkarma (Lyrics).mp3">
+                    <span class="track-number">4</span>
+                    <span class="track-name">Kalapastangan</span>
+                    <span class="track-artist">Fitterkarma</span>
+                </li>
+                <li class="track-item" data-src="Pamungkas - To The Bone (Lyrics).mp3">
+                    <span class="track-number">5</span>
+                    <span class="track-name">To The Bone</span>
+                    <span class="track-artist">Pamungkas</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+    <script src="persistent-audio.js"></script>
+    <script>
+    const audio = document.getElementById('audioPlayer');
+    const playBtn = document.getElementById('playBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressBar = document.getElementById('progressBar');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const trackTitleEl = document.getElementById('trackTitle');
+    const artistEl = document.getElementById('artistName');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const volumeValueEl = document.getElementById('volumeValue');
+    const albumArtEl = document.querySelector('.album-art');
+
+    let currentTrackIndex = 0;
+    let playlist = [];
+
+    function formatTime(time) {
+        if (!time || Number.isNaN(time)) return '0:00';
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function buildPlaylist() {
+        const items = Array.from(document.querySelectorAll('.track-item'));
+        playlist = items.map((item) => ({
+            title: item.querySelector('.track-name')?.textContent.trim() || 'Unknown',
+            artist: item.querySelector('.track-artist')?.textContent.trim() || 'Unknown Artist',
+            src: item.getAttribute('data-src')
+        }));
+    }
+
+    function loadTrack(index) {
+        if (!playlist.length) return;
+
+        currentTrackIndex = (index + playlist.length) % playlist.length;
+        const track = playlist[currentTrackIndex];
+
+        audio.src = track.src;
+        trackTitleEl.textContent = track.title;
+        artistEl.textContent = track.artist;
+        currentTimeEl.textContent = '0:00';
+        durationEl.textContent = '0:00';
+        progressBar.value = 0;
+
+        document.querySelectorAll('.track-item').forEach((item, i) => {
+            item.classList.toggle('active', i === currentTrackIndex);
+        });
+
+        const images = ['f1.png', 'f2.png', 'f3.png', 'f4.png', 'f5.png', 'f6.png', 'f7.png', 'f8.png'];
+        albumArtEl.src = `images/${images[currentTrackIndex % images.length]}`;
+    }
+
+    function playTrack() {
+        audio.play().catch(() => {
+            trackTitleEl.textContent = 'Unable to play track';
+        });
+        playBtn.textContent = '⏸';
+    }
+
+    function pauseTrack() {
+        audio.pause();
+        playBtn.textContent = '▶';
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+            playTrack();
+        } else {
+            pauseTrack();
+        }
+    }
+
+    function nextTrack() {
+        loadTrack(currentTrackIndex + 1);
+        playTrack();
+    }
+
+    function prevTrack() {
+        loadTrack(currentTrackIndex - 1);
+        playTrack();
+    }
+
+    buildPlaylist();
+    audio.volume = 0.7;
+    volumeSlider.value = 70;
+    volumeValueEl.textContent = '70%';
+    loadTrack(0);
+
+    playBtn.addEventListener('click', togglePlay);
+    prevBtn.addEventListener('click', prevTrack);
+    nextBtn.addEventListener('click', nextTrack);
+
+    progressBar.addEventListener('input', () => {
+        if (audio.duration) {
+            const targetTime = (progressBar.value / 100) * audio.duration;
+            currentTimeEl.textContent = formatTime(targetTime);
+        }
+    });
+
+    progressBar.addEventListener('change', () => {
+        if (audio.duration) {
+            audio.currentTime = (progressBar.value / 100) * audio.duration;
+        }
+    });
+
+    volumeSlider.addEventListener('input', () => {
+        audio.volume = volumeSlider.value / 100;
+        volumeValueEl.textContent = `${volumeSlider.value}%`;
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+            progressBar.value = (audio.currentTime / audio.duration) * 100;
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+            durationEl.textContent = formatTime(audio.duration);
+        }
+    });
+
+    audio.addEventListener('ended', nextTrack);
+
+    document.querySelectorAll('.track-item').forEach((item, index) => {
+        item.addEventListener('click', () => {
+            loadTrack(index);
+            playTrack();
+        });
+    });
+    </script>
+    <script src="flower.js"></script>
+</body>
+</html>
